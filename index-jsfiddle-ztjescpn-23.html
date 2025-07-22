@@ -12,32 +12,26 @@
       background: #f0f8e6;
       text-align: center;
     }
-
     .pop-effect {
       font-size: 22px;
       animation: popText 1.5s ease-in-out infinite;
     }
-
     @keyframes popText {
       0%,100% { transform: scale(1); color: #e67e22; }
       50% { transform: scale(1.1); color: #e74c3c; }
     }
-
     @keyframes slideIn {
       from { left: -100px; opacity: 0; }
       to { left: 150px; opacity: 1; }
     }
-
     .slide-corn {
       animation: slideIn 2s ease-out forwards;
     }
-
     #messages {
       max-width: 500px;
       margin: 20px auto;
       text-align: left;
     }
-
     .message {
       background: #fff;
       padding: 15px;
@@ -45,13 +39,11 @@
       border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
     }
-
     .author {
       margin-top: 5px;
       color: #555;
       font-weight: bold;
     }
-
     input, textarea, button {
       font-family: 'Segoe UI', sans-serif;
     }
@@ -62,19 +54,15 @@
   <div id="mainContent"></div>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbyIi-5e9DGORABlwsiPUlYqmV6zboNT0nt8RRN2MOw7xcNxk-XiPa3VB-LBAyU0Z_TiEQ/exec"; // Replace with your Apps Script URL
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyIi-5e9DGORABlwsiPUlYqmV6zboNT0nt8RRN2MOw7xcNxk-XiPa3VB-LBAyU0Z_TiEQ/exec";
     const main = document.getElementById("mainContent");
 
     renderFarm();
 
     function renderFarm() {
       main.innerHTML = `
-        <div id="farm" style="
-          background-color: #dff0c2;
-          height: 500px;
-          position: relative;">
-          <span id="cornIcon"
-                class="slide-corn"
+        <div id="farm" style="background-color: #dff0c2; height: 500px; position: relative;">
+          <span id="cornIcon" class="slide-corn"
                 style="font-size:60px; position:absolute; top:300px; left:150px; cursor:pointer;">🌽</span>
         </div>
         <div id="form" style="display:none; max-width:400px; margin:30px auto; background:white;
@@ -102,25 +90,32 @@
     function submitWish() {
       const name = document.getElementById("name").value.trim() || "Ẩn danh";
       const wish = document.getElementById("wish").value.trim();
+
       if (!wish) return alert("Vui lòng nhập lời chúc!");
 
       fetch(scriptURL, {
         method: "POST",
-        body: JSON.stringify({ name, wish }),
-        headers: { "Content-Type": "application/json" }
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, wish })
       })
-        .then(res => {
-          if (res.ok) {
-            alert("Lời chúc đã được gửi 🎉");
-            addMessageToPage(name, wish);
-            document.getElementById("form").style.display = "none";
-            document.getElementById("name").value = "";
-            document.getElementById("wish").value = "";
-          } else {
-            alert("Gửi lỗi, thử lại sau.");
-          }
-        })
-        .catch(err => alert("Lỗi: " + err));
+      .then(res => res.json())
+      .then(data => {
+        if (data.result === "success") {
+          alert("Lời chúc đã được gửi 🎉");
+          addMessageToPage(name, wish);
+          document.getElementById("form").style.display = "none";
+          document.getElementById("name").value = "";
+          document.getElementById("wish").value = "";
+        } else {
+          alert("Gửi lỗi: " + (data.message || "Không rõ nguyên nhân"));
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Lỗi kết nối đến máy chủ. Vui lòng kiểm tra lại link Apps Script.");
+      });
     }
 
     function addMessageToPage(name, wish) {
