@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Graduation POPcorn</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f8e6;
+      text-align: center;
+    }
+
+    .pop-effect {
+      font-size: 22px;
+      animation: popText 1.5s ease-in-out infinite;
+    }
+
+    @keyframes popText {
+      0%, 100% { transform: scale(1); color: #e67e22; }
+      50% { transform: scale(1.1); color: #e74c3c; }
+    }
+
+    @keyframes slideIn {
+      from { left: -100px; opacity: 0; }
+      to { left: 150px; opacity: 1; }
+    }
+
+    .slide-corn {
+      animation: slideIn 2s ease-out forwards;
+    }
+
+    #messages {
+      max-width: 500px;
+      margin: 20px auto;
+      text-align: left;
+    }
+
+    .message {
+      background: #fff;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+
+    .author {
+      margin-top: 5px;
+      color: #555;
+      font-weight: bold;
+    }
+
+    input, textarea, button {
+      font-family: 'Segoe UI', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎓 Graduation POPcorn 🌽</h1>
+  <div id="mainContent"></div>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyIi-5e9DGORABlwsiPUlYqmV6zboNT0nt8RRN2MOw7xcNxk-XiPa3VB-LBAyU0Z_TiEQ/exec";
+    const main = document.getElementById("mainContent");
+
+    renderFarm();
+
+    function renderFarm() {
+      main.innerHTML = `
+        <div id="farm" style="background-color: #dff0c2; height: 500px; position: relative;">
+          <span id="cornIcon" class="slide-corn" style="font-size:60px; position:absolute; top:300px; left:150px; cursor:pointer;">🌽</span>
+        </div>
+        <div id="form" style="display:none; max-width:400px; margin:30px auto; background:white; padding:20px; border-radius:12px; box-shadow:0 0 15px rgba(0,0,0,0.2);">
+          <h3 class="pop-effect">🎇 Pop pop pop! ✨<br><span style="color:#2ecc71;">Make a wish 🎓💫</span></h3>
+          <input type="text" id="name" placeholder="Tên bạn (tùy chọn)" style="width:90%;padding:10px;">
+          <textarea id="wish" placeholder="Nhập lời chúc..." rows="4" style="width:90%;padding:10px;margin-top:10px;"></textarea>
+          <button onclick="submitWish()" style="width:100%;padding:10px;margin-top:10px;">Gửi lời chúc</button>
+        </div>
+        <div id="messages"><h2>Lời chúc từ bạn bè</h2></div>
+      `;
+
+      const cornEl = document.getElementById("cornIcon");
+      cornEl.addEventListener("click", () => {
+        cornEl.innerText = "🍿";
+        cornEl.style.transform = "scale(1.2) rotate(10deg)";
+        document.getElementById("form").style.display = "block";
+      });
+    }
+
+    function submitWish() {
+      const name = document.getElementById("name").value.trim() || "Ẩn danh";
+      const wish = document.getElementById("wish").value.trim();
+      if (!wish) return alert("Vui lòng nhập lời chúc!");
+
+      fetch(scriptURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, wish })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Gửi thành công:", data);
+        if (data.result === "success") {
+          alert("Lời chúc đã được gửi 🎉");
+          addMessageToPage(name, wish);
+          document.getElementById("form").style.display = "none";
+          document.getElementById("name").value = "";
+          document.getElementById("wish").value = "";
+        } else {
+          alert("Gửi thất bại, vui lòng thử lại.");
+        }
+      })
+      .catch(error => {
+        console.error("Lỗi fetch:", error);
+        alert("Không thể gửi lời chúc. Kiểm tra kết nối hoặc Apps Script.");
+      });
+    }
+
+    function addMessageToPage(name, wish) {
+      const msg = document.createElement("div");
+      msg.className = "message";
+      msg.innerHTML = `<p>${wish}</p><div class="author">— ${name}</div>`;
+      document.getElementById("messages").appendChild(msg);
+    }
+  </script>
+</body>
+</html>
